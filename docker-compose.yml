@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  open-gitclaw:
+    build: .
+    ports:
+      - "8000:8000"
+      - "8001:8001"  # prometheus metrics
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+      - ./skills:/app/skills:ro
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass yourpassword  # change in production
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: unless-stopped
